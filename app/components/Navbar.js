@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Toggle } from "@/components/ui/toggle";
 import { useSearch } from "../context/SearchContext";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const { setSearchTerm } = useSearch(); // Access setSearchTerm from context
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
@@ -22,6 +24,7 @@ export default function Navbar() {
   const handleSearchKeyPress = (event) => {
     if (event.key === "Enter") {
       setSearchTerm(event.target.value); // Update context state with search term
+      router.push("/news/search");
     }
   };
 
@@ -77,7 +80,7 @@ export default function Navbar() {
               </SheetContent>
             </Sheet>
             <a
-              href="/"
+              href="/news"
               className="text-xl font-bold p-4"
               style={{ color: "var(--foreground)" }}
             >

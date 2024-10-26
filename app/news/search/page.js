@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import NewsGrid from "./NewsGrid";
-import SkeletonCard from "./SkeletonCard";
+import { useSearch } from "@/app/context/SearchContext";
+import NewsGrid from "../NewsGrid";
+import SkeletonCard from "../SkeletonCard";
 import {
   Pagination,
   PaginationContent,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/pagination";
 
 function NewsComponent() {
+  const { searchTerm } = useSearch();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,6 +30,7 @@ function NewsComponent() {
         const queryParams = new URLSearchParams({
           page,
           limit,
+          search: searchTerm,
         }).toString();
 
         const response = await fetch(`/api/news?${queryParams}`);
@@ -52,7 +55,7 @@ function NewsComponent() {
     };
 
     fetchArticles();
-  }, [page]);
+  }, [page, searchTerm]);
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -66,7 +69,10 @@ function NewsComponent() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-center p-4"> Latest News</h1>
+      <h1 className="text-3xl font-bold text-center p-4">
+        {" "}
+        Search result for {searchTerm}
+      </h1>
 
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-screen-2xl mx-auto p-4">
