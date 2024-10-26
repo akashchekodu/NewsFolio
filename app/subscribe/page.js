@@ -236,7 +236,7 @@ const SubscribePage = () => {
               <Skeleton />
             ) : keywords.length === 0 ? (
               <p className="text-muted-foreground">
-                You haven't subscribed to any keywords yet.
+                You haven&apos;t subscribed to any keywords yet.
               </p>
             ) : (
               <div className="h-full flex-grow overflow-y-auto max-h-[55vh] md:max-h-[60vh] pr-2">
