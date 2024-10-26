@@ -1,6 +1,7 @@
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import pool from "@/app/utils/connection";
+import { signOut } from "next-auth/react";
 
 export const options = {
   providers: [

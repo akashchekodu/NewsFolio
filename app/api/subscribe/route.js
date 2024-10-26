@@ -1,3 +1,5 @@
+// /api/subscribe
+
 import pool from "@/app/utils/connection"; // Assuming this is your database connection
 import { NextResponse } from "next/server";
 

@@ -11,27 +11,35 @@ import { useSearch } from "../context/SearchContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const { setSearchTerm, setSearch, search } = useSearch(); // Access setSearchTerm from context
+  const { setSearchTerm, setSearch, search } = useSearch();
   const router = useRouter();
   const pathname = usePathname();
   const isAuthPage = pathname === "/auth";
+  const { data: session, status } = useSession();
+  const loggedIn = status === "authenticated";
 
   useEffect(() => {
     setIsMounted(true);
     setSearchTerm("");
-    setSearch(""); // Clear search input when the component mounts
+    setSearch("");
   }, []);
 
   const handleSearchKeyPress = (event) => {
     if (event.key === "Enter") {
-      setSearchTerm(search); // Update context state with search term
+      setSearchTerm(search);
       router.push("/news/search");
     }
+  };
+
+  const handleLogOut = async () => {
+    await signOut({ callbackUrl: "/news" });
   };
 
   const isDarkMode = theme === "dark";
@@ -49,7 +57,6 @@ export default function Navbar() {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-2 md:px-8">
         <div className="flex items-center space-x-2 md:space-x-4">
-          {/* Menu and Brand on the left */}
           <div className="flex items-center">
             <Sheet>
               <SheetTrigger asChild>
@@ -60,7 +67,7 @@ export default function Navbar() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-4">
-                  {!isAuthPage && (
+                  {!isAuthPage && !loggedIn && (
                     <Link
                       variant="ghost"
                       className="justify-start"
@@ -68,6 +75,15 @@ export default function Navbar() {
                     >
                       Login
                     </Link>
+                  )}
+                  {loggedIn && (
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={handleLogOut}
+                    >
+                      Logout
+                    </Button>
                   )}
                   <Toggle
                     aria-label="Toggle dark mode"
@@ -92,17 +108,27 @@ export default function Navbar() {
                 </div>
               </SheetContent>
             </Sheet>
-            <Link
-              href="/news"
-              className="text-xl font-bold p-4"
-              style={{ color: "var(--foreground)" }}
-            >
-              MyApp
-            </Link>
+            {!loggedIn && (
+              <Link
+                href="/news"
+                className="text-xl font-bold p-4"
+                style={{ color: "var(--foreground)" }}
+              >
+                MyApp
+              </Link>
+            )}
+            {loggedIn && (
+              <Link
+                href="/feed"
+                className="text-xl font-bold p-4"
+                style={{ color: "var(--foreground)" }}
+              >
+                MyApp
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* Search icon on the right in mobile view */}
         <Button
           variant="ghost"
           size="icon"
@@ -118,8 +144,8 @@ export default function Navbar() {
             <Input
               type="search"
               placeholder="Search..."
-              value={search} // Bind input value to state
-              onChange={(e) => setSearch(e.target.value)} // Update state on change
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleSearchKeyPress}
               className="w-[200px] md:w-[300px]"
               style={{
@@ -128,17 +154,17 @@ export default function Navbar() {
               }}
             />
           )}
-          {!isAuthPage && (
+          {loggedIn && (
             <Button>
-              <Link
-                variant="ghost"
-                // className="text-slate-700 dark:text-slate-400"
-                href="/auth"
-              >
-                Login
-              </Link>
+              <Link href="/subscribe">Subsciptions</Link>
             </Button>
           )}
+          {!isAuthPage && !loggedIn && (
+            <Button>
+              <Link href="/auth">Login</Link>
+            </Button>
+          )}
+          {loggedIn && <Button onClick={handleLogOut}>Logout</Button>}
           <Toggle
             aria-label="Toggle dark mode"
             pressed={isDarkMode}
@@ -165,8 +191,8 @@ export default function Navbar() {
           <Input
             type="search"
             placeholder="Search..."
-            value={search} // Bind input value to state
-            onChange={(e) => setSearch(e.target.value)} // Update state on change
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearchKeyPress}
             className="w-full"
             style={{

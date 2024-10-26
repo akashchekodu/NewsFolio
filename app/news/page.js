@@ -23,6 +23,7 @@ function NewsComponent() {
   const [totalPages, setTotalPages] = useState(1);
   const { setSearchTerm, setSearch } = useSearch(); // Access setSearchTerm from context
   const limit = 12;
+  const isMobile = window.innerWidth < 640; // Change 640 to your breakpoint
 
   useEffect(() => {
     setIsMounted(true);
@@ -68,6 +69,40 @@ function NewsComponent() {
       setPage(newPage);
     }
   };
+  const getPaginationRange = () => {
+    const range = [];
+    const maxPagesToShow = 4; // Maximum number of page links to show
+    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2)); // Center current page
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    // Adjust start page if the end exceeds total pages
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    // Add first page
+    if (startPage > 1) {
+      range.push(1);
+      if (startPage > 2) {
+        range.push("..."); // Add ellipsis if there's a gap
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      range.push(i);
+    }
+
+    // Add last page
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        range.push("..."); // Add ellipsis if there's a gap
+      }
+      range.push(totalPages);
+    }
+
+    return range;
+  };
+
   if (!isMounted) {
     return (
       <div className="grid gap-3">
@@ -136,37 +171,45 @@ function NewsComponent() {
 
       {!loading && (
         <div className="p-4">
-          <Pagination>
-            <PaginationContent>
-              {page > 1 && (
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={() => handlePageChange(page - 1)}
-                  />
-                </PaginationItem>
-              )}
-              {[...Array(totalPages)].map((_, idx) => (
-                <PaginationItem key={idx}>
-                  <PaginationLink
-                    href="#"
-                    isActive={page === idx + 1}
-                    onClick={() => handlePageChange(idx + 1)}
-                  >
-                    {idx + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              {page < totalPages && (
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={() => handlePageChange(page + 1)}
-                  />
-                </PaginationItem>
-              )}
-            </PaginationContent>
-          </Pagination>
+          <div className="pagination-container">
+            {" "}
+            {/* Add this wrapper */}
+            <Pagination>
+              <PaginationContent>
+                {!isMobile && page > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={() => handlePageChange(page - 1)}
+                    />
+                  </PaginationItem>
+                )}
+                {getPaginationRange().map((pageNumber, index) => (
+                  <PaginationItem key={index}>
+                    {typeof pageNumber === "number" ? (
+                      <PaginationLink
+                        href="#"
+                        isActive={page === pageNumber}
+                        onClick={() => handlePageChange(pageNumber)}
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    ) : (
+                      <span className="px-2">...</span> // Display ellipsis
+                    )}
+                  </PaginationItem>
+                ))}
+                {!isMobile && page < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={() => handlePageChange(page + 1)}
+                    />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       )}
     </div>

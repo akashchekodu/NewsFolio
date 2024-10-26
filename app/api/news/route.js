@@ -1,3 +1,5 @@
+// /api/news
+
 const { NextResponse } = require("next/server");
 import pool from "@/app/utils/connection";
 
