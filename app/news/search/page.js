@@ -1,3 +1,5 @@
+// /news/search
+
 "use client";
 import { useEffect, useState } from "react";
 import { useSearch } from "@/app/context/SearchContext";
@@ -43,9 +45,7 @@ function NewsComponent() {
 
         // Calculate total pages based on totalArticles and limit
         const totalArticles = data.totalArticles || 0;
-        console.log(totalArticles);
         setTotalPages(Math.ceil(totalArticles / limit));
-        setPage(1);
       } catch (err) {
         console.error("Error fetching news:", err);
         setError(err.message);

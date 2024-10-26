@@ -9,21 +9,27 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Toggle } from "@/components/ui/toggle";
 import { useSearch } from "../context/SearchContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const { setSearchTerm } = useSearch(); // Access setSearchTerm from context
+  const { setSearchTerm, setSearch, search } = useSearch(); // Access setSearchTerm from context
   const router = useRouter();
+  const pathname = usePathname();
+  const isAuthPage = pathname === "/auth";
 
   useEffect(() => {
     setIsMounted(true);
+    setSearchTerm("");
+    setSearch(""); // Clear search input when the component mounts
   }, []);
 
   const handleSearchKeyPress = (event) => {
     if (event.key === "Enter") {
-      setSearchTerm(event.target.value); // Update context state with search term
+      setSearchTerm(search); // Update context state with search term
       router.push("/news/search");
     }
   };
@@ -38,6 +44,7 @@ export default function Navbar() {
       style={{
         backgroundColor: "var(--secondary-bg)",
         color: "var(--foreground)",
+        height: "6.4vh",
       }}
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-2 md:px-8">
@@ -53,9 +60,15 @@ export default function Navbar() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-4">
-                  <Button variant="ghost" className="justify-start">
-                    Login
-                  </Button>
+                  {!isAuthPage && (
+                    <Link
+                      variant="ghost"
+                      className="justify-start"
+                      href="/auth"
+                    >
+                      Login
+                    </Link>
+                  )}
                   <Toggle
                     aria-label="Toggle dark mode"
                     pressed={isDarkMode}
@@ -79,13 +92,13 @@ export default function Navbar() {
                 </div>
               </SheetContent>
             </Sheet>
-            <a
+            <Link
               href="/news"
               className="text-xl font-bold p-4"
               style={{ color: "var(--foreground)" }}
             >
               MyApp
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -101,26 +114,31 @@ export default function Navbar() {
         </Button>
 
         <div className="hidden md:flex md:items-center md:space-x-4">
-          <Input
-            type="search"
-            placeholder="Search..."
-            onKeyDown={handleSearchKeyPress}
-            className="w-[200px] md:w-[300px]"
-            style={{
-              backgroundColor: "var(--input)",
-              color: "var(--foreground)",
-            }}
-          />
-          <Button
-            variant="ghost"
-            className="text-slate-700 dark:text-slate-400"
-            style={{
-              backgroundColor: "var(--primary-foreground)",
-              color: "",
-            }}
-          >
-            Login
-          </Button>
+          {!isAuthPage && (
+            <Input
+              type="search"
+              placeholder="Search..."
+              value={search} // Bind input value to state
+              onChange={(e) => setSearch(e.target.value)} // Update state on change
+              onKeyDown={handleSearchKeyPress}
+              className="w-[200px] md:w-[300px]"
+              style={{
+                backgroundColor: "var(--input)",
+                color: "var(--foreground)",
+              }}
+            />
+          )}
+          {!isAuthPage && (
+            <Button>
+              <Link
+                variant="ghost"
+                // className="text-slate-700 dark:text-slate-400"
+                href="/auth"
+              >
+                Login
+              </Link>
+            </Button>
+          )}
           <Toggle
             aria-label="Toggle dark mode"
             pressed={isDarkMode}
@@ -147,6 +165,8 @@ export default function Navbar() {
           <Input
             type="search"
             placeholder="Search..."
+            value={search} // Bind input value to state
+            onChange={(e) => setSearch(e.target.value)} // Update state on change
             onKeyDown={handleSearchKeyPress}
             className="w-full"
             style={{
