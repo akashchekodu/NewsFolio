@@ -23,12 +23,29 @@ function NewsComponent() {
   const [totalPages, setTotalPages] = useState(1);
   const { setSearchTerm, setSearch } = useSearch(); // Access setSearchTerm from context
   const limit = 12;
-  const isMobile = window.innerWidth < 640; // Change 640 to your breakpoint
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
     setSearchTerm("");
     setSearch("");
+  }, []);
+
+  useEffect(() => {
+    const handleMediaChange = (e) => setIsMobile(e.matches);
+
+    if (typeof window !== "undefined") {
+      const mediaQuery = window.matchMedia("(max-width: 640px)");
+
+      // Set the initial state
+      setIsMobile(mediaQuery.matches);
+
+      // Add listener
+      mediaQuery.addEventListener("change", handleMediaChange);
+
+      // Cleanup listener on unmount
+      return () => mediaQuery.removeEventListener("change", handleMediaChange);
+    }
   }, []);
 
   useEffect(() => {

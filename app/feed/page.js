@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import NewsGrid from "../news/NewsGrid";
 import SkeletonCard from "../news/SkeletonCard";
-import { useSession } from "next-auth/react"; // Import useSession for authentication
+import { useSession } from "next-auth/react";
 import {
   Pagination,
   PaginationContent,
@@ -22,19 +22,36 @@ function FeedPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const router = useRouter(); // For redirecting to the news page
+  const router = useRouter();
   const limit = 12;
-  const isMobile = window.innerWidth < 640;
+  const [isMobile, setIsMobile] = useState(false);
 
-  const { data: session, status } = useSession(); // Get session data
-  const userEmail = session?.user?.email; // Extract user's email from session data
+  const { data: session, status } = useSession();
+  const userEmail = session?.user?.email;
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!userEmail) return; // Only fetch feed if the user is authenticated
+    const handleMediaChange = (e) => setIsMobile(e.matches);
+
+    if (typeof window !== "undefined") {
+      const mediaQuery = window.matchMedia("(max-width: 640px)");
+
+      // Set the initial state
+      setIsMobile(mediaQuery.matches);
+
+      // Add listener
+      mediaQuery.addEventListener("change", handleMediaChange);
+
+      // Cleanup listener on unmount
+      return () => mediaQuery.removeEventListener("change", handleMediaChange);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!userEmail) return;
 
     const fetchFeedArticles = async () => {
       setLoading(true);
@@ -42,7 +59,7 @@ function FeedPage() {
 
       try {
         const queryParams = new URLSearchParams({
-          email: userEmail, // Pass the user's email to the API call
+          email: userEmail,
           page,
           limit,
         }).toString();
@@ -55,7 +72,6 @@ function FeedPage() {
         const data = await response.json();
         setFeedArticles(data.news);
 
-        // Calculate total pages based on totalArticles and limit
         const totalArticles = data.totalArticles || 0;
         setTotalPages(Math.ceil(totalArticles / limit));
       } catch (err) {
@@ -77,20 +93,18 @@ function FeedPage() {
 
   const getPaginationRange = () => {
     const range = [];
-    const maxPagesToShow = 3; // Maximum number of page links to show
-    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2)); // Center current page
+    const maxPagesToShow = 3;
+    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
-    // Adjust start page if the end exceeds total pages
     if (endPage - startPage < maxPagesToShow - 1) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
 
-    // Add first page
     if (startPage > 1) {
       range.push(1);
       if (startPage > 2) {
-        range.push("..."); // Add ellipsis if there's a gap
+        range.push("...");
       }
     }
 
@@ -98,10 +112,9 @@ function FeedPage() {
       range.push(i);
     }
 
-    // Add last page
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
-        range.push("..."); // Add ellipsis if there's a gap
+        range.push("...");
       }
       range.push(totalPages);
     }
@@ -137,6 +150,7 @@ function FeedPage() {
   if (error) {
     return <div>Error: {error}</div>;
   }
+
   if (totalPages === 0) {
     return (
       <div className="h-[93.6vh] flex flex-col">
