@@ -74,6 +74,7 @@ export async function GET(req) {
       date: item.date ? item.date.toISOString() : null,
       description: item.description,
       source: item.source,
+      created_at: item.created_at,
     }));
 
     // Return the news feed with pagination info
