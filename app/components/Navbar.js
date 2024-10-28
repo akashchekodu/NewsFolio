@@ -22,6 +22,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const isAuthPage = pathname === "/auth";
+  const isFeed = pathname === "/feed";
   const { data: session, status } = useSession();
   const loggedIn = status === "authenticated";
 
@@ -73,13 +74,15 @@ export default function Navbar() {
                       className="justify-start"
                       href="/auth"
                     >
-                      Login
+                      <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                        Login
+                      </Button>
                     </Link>
                   )}
                   {loggedIn && (
                     <Button
                       variant="ghost"
-                      className="justify-start"
+                      className="justify-start bg-red-600 text-white hover:bg-red-700"
                       onClick={handleLogOut}
                     >
                       Logout
@@ -108,24 +111,13 @@ export default function Navbar() {
                 </div>
               </SheetContent>
             </Sheet>
-            {!loggedIn && (
-              <Link
-                href="/news"
-                className="text-xl font-bold p-4"
-                style={{ color: "var(--foreground)" }}
-              >
-                MyApp
-              </Link>
-            )}
-            {loggedIn && (
-              <Link
-                href="/feed"
-                className="text-xl font-bold p-4"
-                style={{ color: "var(--foreground)" }}
-              >
-                MyApp
-              </Link>
-            )}
+            <Link
+              href={loggedIn ? "/feed" : "/news"}
+              className="text-xl font-bold p-4"
+              style={{ color: "var(--foreground)" }}
+            >
+              MyApp
+            </Link>
           </div>
         </div>
 
@@ -143,28 +135,40 @@ export default function Navbar() {
           {!isAuthPage && (
             <Input
               type="search"
-              placeholder="Search..."
+              placeholder="Search News"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleSearchKeyPress}
-              className="w-[200px] md:w-[300px]"
+              className="w-[200px] md:w-[300px] mr-4" // Adjust spacing with margin-right
               style={{
                 backgroundColor: "var(--input)",
                 color: "var(--foreground)",
               }}
             />
           )}
-          {loggedIn && (
-            <Button>
-              <Link href="/subscribe">Subsciptions</Link>
+          {loggedIn && isFeed && (
+            <Button className="ml-4">
+              <Link href="/subscribe">My Subscriptions</Link>
+            </Button>
+          )}
+          {loggedIn && !isFeed && (
+            <Button className="ml-4">
+              <Link href="/feed">My Feed</Link>
             </Button>
           )}
           {!isAuthPage && !loggedIn && (
-            <Button>
+            <Button className="bg-blue-600 text-white hover:bg-blue-700">
               <Link href="/auth">Login</Link>
             </Button>
           )}
-          {loggedIn && <Button onClick={handleLogOut}>Logout</Button>}
+          {loggedIn && (
+            <Button
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={handleLogOut}
+            >
+              Logout
+            </Button>
+          )}
           <Toggle
             aria-label="Toggle dark mode"
             pressed={isDarkMode}
@@ -190,7 +194,7 @@ export default function Navbar() {
         >
           <Input
             type="search"
-            placeholder="Search..."
+            placeholder="Search News"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearchKeyPress}

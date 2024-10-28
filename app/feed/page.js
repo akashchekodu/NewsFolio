@@ -154,7 +154,7 @@ function FeedPage() {
   if (totalPages === 0) {
     return (
       <div className="h-[93.6vh] flex flex-col">
-        <h1 className="text-3xl font-bold text-center p-4 sticky top-0 bg-white">
+        <h1 className="text-3xl font-bold  p-4 sticky top-0 bg-white">
           Your Feed
         </h1>
         <div className="flex-grow flex items-center justify-center">
@@ -253,13 +253,15 @@ function FeedPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center p-4">
-        <h1 className="text-3xl font-bold text-center">Your Feed</h1>
+      <div className="relative flex justify-center items-center p-4">
+        <h1 className="text-3xl font-bold absolute left-1/2 transform -translate-x-1/2">
+          Your Feed
+        </h1>
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="ml-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           onClick={() => router.push("/news")} // Redirect to the news page
         >
-          Show Latest News
+          Show Global News
         </button>
       </div>
 
@@ -272,6 +274,7 @@ function FeedPage() {
       ) : (
         <NewsGrid articles={feedArticles} />
       )}
+
       {!loading && (
         <div className="p-4">
           <Pagination>
