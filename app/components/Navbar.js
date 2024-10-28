@@ -139,7 +139,7 @@ export default function Navbar() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleSearchKeyPress}
-              className="w-[200px] md:w-[300px] mr-4" // Adjust spacing with margin-right
+              className="w-[200px] md:w-[300px] mr-4 border rounded-md border-slate-300 dark:border-gray-500"
               style={{
                 backgroundColor: "var(--input)",
                 color: "var(--foreground)",
