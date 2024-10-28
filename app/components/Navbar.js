@@ -116,7 +116,7 @@ export default function Navbar() {
               className="text-xl font-bold p-4"
               style={{ color: "var(--foreground)" }}
             >
-              MyApp
+              NewsFolio
             </Link>
           </div>
         </div>
