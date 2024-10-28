@@ -61,7 +61,7 @@ export async function GET(req) {
       SELECT title, link, date, description, source, created_at
       FROM news 
       WHERE ${keywordConditions} 
-      ORDER BY date DESC 
+      ORDER BY created_at DESC 
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `;
     params.push(limit, offset); // Add limit and offset to the params
