@@ -36,12 +36,7 @@ export const options = {
           `SELECT * FROM users WHERE email = $1`,
           [user.email]
         );
-        console.log(
-          user.email,
-          user.name,
-          account.provider,
-          account.providerAccountId
-        );
+
         // If user doesn't exist, insert them into the database with provider details
         if (rows.length === 0) {
           await pool.query(

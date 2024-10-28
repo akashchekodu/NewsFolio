@@ -9,14 +9,6 @@ export async function GET(req) {
   const limit = parseInt(searchParams.get("limit")) || 10; // Get pagination limit
   const offset = (page - 1) * limit; // Calculate offset
 
-  // Log incoming parameters
-  console.log("Incoming Parameters:", {
-    searchQuery,
-    sourceFilter,
-    page,
-    limit,
-  });
-
   try {
     // Base SQL query for fetching news
     let sqlQuery = `
@@ -46,8 +38,6 @@ export async function GET(req) {
     }
 
     // Log the query conditions
-    console.log("SQL Query Conditions:", queryConditions);
-    console.log("SQL Params:", params);
 
     // Count total articles matching the criteria
     let countQuery = `
@@ -76,7 +66,6 @@ export async function GET(req) {
     }
 
     // Log count query and parameters
-    console.log("Count Query:", countQuery, "Params:", countParams);
 
     // Execute the count query first
     const countResult = await pool.query(countQuery, countParams);
@@ -89,7 +78,6 @@ export async function GET(req) {
     params.push(limit, offset); // Push limit and offset
 
     // Log fetch query
-    console.log("Fetch Query:", sqlQuery, "Params:", params);
 
     // Execute the SQL query for paginated articles
     const result = await pool.query(sqlQuery, params);
