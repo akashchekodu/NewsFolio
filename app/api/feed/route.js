@@ -58,7 +58,7 @@ export async function GET(req) {
 
     // Fetch the actual news articles with pagination
     const newsQuery = `
-      SELECT title, link, date, description, source 
+      SELECT title, link, date, description, source, created_at
       FROM news 
       WHERE ${keywordConditions} 
       ORDER BY date DESC 
