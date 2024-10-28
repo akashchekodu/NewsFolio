@@ -1,7 +1,8 @@
-//layout.js
+// layout.js
 
 "use client";
 
+import Head from "next/head";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "./components/Navbar";
@@ -23,6 +24,11 @@ const geistMono = localFont({
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <Head>
+        <meta name="description" content="Finance News Aggregator" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NewsFolio</title>
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
