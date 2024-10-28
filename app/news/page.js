@@ -53,21 +53,19 @@ function NewsComponent() {
       setLoading(true);
       setError(null);
 
-      try {
-        const queryParams = new URLSearchParams({
-          page,
-          limit,
-        }).toString();
+      const queryParams = new URLSearchParams({ page, limit }).toString();
+      console.log(`Fetching articles with params: ${queryParams}`);
 
+      try {
         const response = await fetch(`/api/news?${queryParams}`);
         if (!response.ok) {
           throw new Error("Failed to fetch news articles");
         }
 
         const data = await response.json();
-        setArticles(data.news);
+        console.log(data);
 
-        // Calculate total pages based on totalArticles and limit
+        setArticles(data.news);
         const totalArticles = data.totalArticles || 0;
         setTotalPages(Math.ceil(totalArticles / limit));
       } catch (err) {

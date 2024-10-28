@@ -13,6 +13,7 @@ const NewsGrid = ({ articles }) => {
           source={article.source}
           date={article.date}
           link={article.link}
+          created_at={article.created_at}
         />
       ))}
     </div>

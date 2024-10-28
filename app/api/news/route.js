@@ -1,5 +1,3 @@
-// /api/news
-
 const { NextResponse } = require("next/server");
 import pool from "@/app/utils/connection";
 
@@ -11,10 +9,18 @@ export async function GET(req) {
   const limit = parseInt(searchParams.get("limit")) || 10; // Get pagination limit
   const offset = (page - 1) * limit; // Calculate offset
 
+  // Log incoming parameters
+  console.log("Incoming Parameters:", {
+    searchQuery,
+    sourceFilter,
+    page,
+    limit,
+  });
+
   try {
     // Base SQL query for fetching news
     let sqlQuery = `
-      SELECT title, link, date, description, source 
+      SELECT title, link, date, description, source, created_at
       FROM news 
       WHERE TRUE
     `;
@@ -25,7 +31,7 @@ export async function GET(req) {
     // Add conditions for search query
     if (searchQuery) {
       queryConditions.push(`title ~* $${queryConditions.length + 1}`);
-      params.push(`\\y${searchQuery}\\y`);
+      params.push(`\\y${searchQuery}\\y`); // Regular expression for whole word match
     }
 
     // Add conditions for source filter
@@ -39,20 +45,29 @@ export async function GET(req) {
       sqlQuery += " AND " + queryConditions.join(" AND ");
     }
 
+    // Log the query conditions
+    console.log("SQL Query Conditions:", queryConditions);
+    console.log("SQL Params:", params);
+
     // Count total articles matching the criteria
     let countQuery = `
       SELECT COUNT(*) AS total 
       FROM news 
       WHERE TRUE
     `;
-    const countConditions = [];
 
+    const countConditions = [];
+    const countParams = []; // Use a separate params array for the count query
+
+    // Append the same conditions for counting
     if (searchQuery) {
       countConditions.push(`title ~* $${countConditions.length + 1}`);
+      countParams.push(`\\y${searchQuery}\\y`); // Ensure the same regex is used
     }
 
     if (sourceFilter) {
       countConditions.push(`source = $${countConditions.length + 1}`);
+      countParams.push(sourceFilter);
     }
 
     // Append conditions to the count query
@@ -60,15 +75,21 @@ export async function GET(req) {
       countQuery += " AND " + countConditions.join(" AND ");
     }
 
+    // Log count query and parameters
+    console.log("Count Query:", countQuery, "Params:", countParams);
+
     // Execute the count query first
-    const countResult = await pool.query(countQuery, params);
+    const countResult = await pool.query(countQuery, countParams);
     const totalArticles = parseInt(countResult.rows[0].total, 10); // Get total articles count
 
     // Add order by, limit, and offset for pagination to the news query
-    sqlQuery += ` ORDER BY date DESC LIMIT $${params.length + 1} OFFSET $${
-      params.length + 2
-    }`;
-    params.push(limit, offset);
+    sqlQuery += ` ORDER BY created_at DESC LIMIT $${
+      params.length + 1
+    } OFFSET $${params.length + 2}`;
+    params.push(limit, offset); // Push limit and offset
+
+    // Log fetch query
+    console.log("Fetch Query:", sqlQuery, "Params:", params);
 
     // Execute the SQL query for paginated articles
     const result = await pool.query(sqlQuery, params);
@@ -80,6 +101,7 @@ export async function GET(req) {
       date: item.date ? item.date.toISOString() : null,
       description: item.description,
       source: item.source,
+      created_at: item.created_at,
     }));
 
     // Return the news with pagination info
