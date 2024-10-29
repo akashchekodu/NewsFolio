@@ -21,7 +21,6 @@ NewsFolio is a news aggregator web application that fetches and displays news ar
 ### Prerequisites
 
 - Node.js and npm
-- Python 3.x
 - Supabase account for database management
 
 ### Installation
