@@ -37,7 +37,6 @@ NewsFolio is a news aggregator web application that fetches and displays news ar
 2. Install dependencies:
 
    ```bash
-   cd app
    npm install
    ```
 
