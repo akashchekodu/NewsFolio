@@ -1,5 +1,7 @@
 # NewsFolio
 
+https://newsfolio.vercel.app/
+
 NewsFolio is a news aggregator web application that fetches and displays news articles from various sources, allowing users to stay updated with the latest happenings in real-time. Users can subscribe to specific topics or stocks, and relevant news articles will be displayed on their dashboard.
 
 ## Features
