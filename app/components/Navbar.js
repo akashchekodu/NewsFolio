@@ -69,7 +69,7 @@ export default function Navbar() {
                 {!isAuthPage && !loggedIn && (
                   <SheetClose asChild>
                     <Link href="/auth">
-                      <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
+                      <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700">
                         Login
                       </Button>
                     </Link>
@@ -99,7 +99,7 @@ export default function Navbar() {
                       </SheetClose>
                     )}
                     <Button
-                      className="w-full bg-red-600 text-white hover:bg-red-700"
+                      className="w-full bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
                       onClick={handleLogOut}
                     >
                       Logout
@@ -112,7 +112,7 @@ export default function Navbar() {
                   onPressedChange={() =>
                     setTheme(isDarkMode ? "light" : "dark")
                   }
-                  className="w-full justify-start bg-muted hover:bg-muted-foreground/10"
+                  className="w-full justify-start bg-secondary hover:bg-secondary/80 text-secondary-foreground"
                 >
                   {isDarkMode ? (
                     <>
@@ -176,13 +176,13 @@ export default function Navbar() {
               </Button>
             )}
             {!isAuthPage && !loggedIn && (
-              <Button className="bg-blue-600 text-white hover:bg-blue-700">
+              <Button className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700">
                 <Link href="/auth">Login</Link>
               </Button>
             )}
             {loggedIn && (
               <Button
-                className="bg-red-600 text-white hover:bg-red-700"
+                className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
                 onClick={handleLogOut}
               >
                 Logout
@@ -192,7 +192,7 @@ export default function Navbar() {
               aria-label="Toggle dark mode"
               pressed={isDarkMode}
               onPressedChange={() => setTheme(isDarkMode ? "light" : "dark")}
-              className="bg-muted hover:bg-muted-foreground/10"
+              className="bg-background hover:bg-accent"
             >
               {isDarkMode ? (
                 <Sun className="h-4 w-4" />
