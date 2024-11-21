@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X, ArrowLeft } from "lucide-react"; // Import ArrowLeft icon for back button
+import { X } from "lucide-react"; // Import ArrowLeft icon for back button
 import { useRouter } from "next/navigation"; // Import Next.js useRouter
 import { useSession } from "next-auth/react";
 
@@ -189,13 +189,7 @@ const SubscribePage = () => {
     <div className="flex flex-col h-[93.6vh] container mx-auto p-4 overflow-hidden">
       {/* Header section with Back Button and centered Title */}
       <div className="flex justify-between items-center mb-6">
-        <Button
-          className=" "
-          onClick={() => router.push("/feed")} // Navigate to feed page
-        >
-          <ArrowLeft className="mr-2" /> Back
-        </Button>
-        <h1 className="text-2xl font-bold text-center flex-grow">
+        <h1 className="text-2xl font-bold text-center  flex-grow">
           Manage Your Subscriptions
         </h1>
         <div className="w-16"></div>{" "}

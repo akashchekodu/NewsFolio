@@ -284,16 +284,10 @@ function FeedPage() {
 
   return (
     <div>
-      <div className="relative flex justify-center items-center p-4">
-        <h1 className="text-3xl font-bold absolute left-1/2 transform -translate-x-1/2">
+      <div className="relative  pt-8 flex justify-center items-center p-4">
+        <h1 className="text-3xl  font-bold absolute left-1/2 transform -translate-x-1/2">
           Your Feed
         </h1>
-        <button
-          className="ml-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          onClick={() => router.push("/news")} // Redirect to the news page
-        >
-          Show Global News
-        </button>
       </div>
 
       {loading ? (
