@@ -15,7 +15,7 @@ import { useSearch } from "../context/SearchContext";
 
 function NewsComponent() {
   const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -26,7 +26,7 @@ function NewsComponent() {
   useEffect(() => {
     setSearchTerm("");
     setSearch("");
-  }, []);
+  }, [setSearchTerm, setSearch]);
 
   useEffect(() => {
     const handleMediaChange = (e) => setIsMobile(e.matches);
@@ -107,64 +107,71 @@ function NewsComponent() {
     return range;
   };
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-center pt-4">Latest News</h1>
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-3xl font-bold text-center mb-4">Latest News</h1>
 
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-screen-2xl mx-auto p-4">
-          {Array.from({ length: limit }).map((_, index) => (
-            <SkeletonCard key={index} />
-          ))}
+      <NewsGrid articles={articles} isLoading={loading} />
+
+      {error && (
+        <div className="text-red-500 text-center mt-4" role="alert">
+          Error: {error}
         </div>
-      ) : (
-        <NewsGrid articles={articles} />
       )}
 
-      {!loading && (
-        <div className="p-4">
-          <div className="pagination-container">
-            <Pagination>
-              <PaginationContent>
-                {!isMobile && page > 1 && (
-                  <PaginationItem>
-                    <PaginationPrevious
+      {!loading && !error && (
+        <nav className="mt-8" aria-label="Pagination">
+          <Pagination>
+            <PaginationContent>
+              {!isMobile && page > 1 && (
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(page - 1);
+                    }}
+                    aria-label="Go to previous page"
+                  />
+                </PaginationItem>
+              )}
+              {getPaginationRange().map((pageNumber, index) => (
+                <PaginationItem key={index}>
+                  {typeof pageNumber === "number" ? (
+                    <PaginationLink
                       href="#"
-                      onClick={() => handlePageChange(page - 1)}
-                    />
-                  </PaginationItem>
-                )}
-                {getPaginationRange().map((pageNumber, index) => (
-                  <PaginationItem key={index}>
-                    {typeof pageNumber === "number" ? (
-                      <PaginationLink
-                        href="#"
-                        isActive={page === pageNumber}
-                        onClick={() => handlePageChange(pageNumber)}
-                      >
-                        {pageNumber}
-                      </PaginationLink>
-                    ) : (
-                      <span className="px-2">...</span>
-                    )}
-                  </PaginationItem>
-                ))}
-                {!isMobile && page < totalPages && (
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={() => handlePageChange(page + 1)}
-                    />
-                  </PaginationItem>
-                )}
-              </PaginationContent>
-            </Pagination>
-          </div>
-        </div>
+                      isActive={page === pageNumber}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(pageNumber);
+                      }}
+                      aria-label={`Go to page ${pageNumber}`}
+                      aria-current={page === pageNumber ? "page" : undefined}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  ) : (
+                    <span className="px-2" aria-hidden="true">
+                      ...
+                    </span>
+                  )}
+                </PaginationItem>
+              ))}
+              {!isMobile && page < totalPages && (
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(page + 1);
+                    }}
+                    aria-label="Go to next page"
+                  />
+                </PaginationItem>
+              )}
+            </PaginationContent>
+          </Pagination>
+        </nav>
       )}
     </div>
   );
