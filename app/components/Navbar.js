@@ -54,8 +54,8 @@ export default function Navbar() {
 
   return (
     <nav className="w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-slate-900">
-      <div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 lg:px-8">
-        <div className="flex items-center space-x-4">
+      <div className="container mx-auto  flex h-16 items-center px-4 lg:px-8">
+        <div className="flex items-center">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden">
@@ -131,13 +131,13 @@ export default function Navbar() {
           </Sheet>
           <Link
             href={loggedIn && !isFeed ? "/feed" : "/news"}
-            className="text-xl font-bold"
+            className="text-2xl font-bold pl-4 lg:pl-8"
           >
             NewsFolio
           </Link>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4 ml-auto pr-4 lg:pr-8">
           {!isAuthPage && (
             <div className="hidden lg:block">
               <Input
