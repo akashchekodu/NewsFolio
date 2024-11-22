@@ -1,14 +1,6 @@
-// layout.js
-
-"use client";
-
-import Head from "next/head";
 import localFont from "next/font/local";
 import "./globals.css";
-import Navbar from "./components/Navbar";
-import { ThemeProvider } from "next-themes";
-import { SearchProvider } from "./context/SearchContext";
-import { SessionProvider } from "next-auth/react";
+import Providers from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,25 +13,23 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+export const metadata = {
+  title: "NewsFolio",
+  description: "Finance News Aggregator",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <Head>
-        <meta name="description" content="Finance News Aggregator" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>NewsFolio</title>
-      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider>
-          <SearchProvider>
-            <ThemeProvider attribute="class">
-              <Navbar />
-              {children}
-            </ThemeProvider>
-          </SearchProvider>
-        </SessionProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
