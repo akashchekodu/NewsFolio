@@ -54,7 +54,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-slate-900">
-      <div className="container mx-auto  flex h-16 items-center px-4 lg:px-8">
+      <div className="container mx-auto flex h-16 items-center px-4 lg:px-8">
         <div className="flex items-center">
           <Sheet>
             <SheetTrigger asChild>
@@ -65,38 +65,38 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-4 mt-8">
-                {/*Removed extra close button*/}
                 {!isAuthPage && !loggedIn && (
-                  <SheetClose asChild>
-                    <Link href="/auth">
-                      <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700">
-                        Login
-                      </Button>
-                    </Link>
-                  </SheetClose>
+                  <Link href="/auth" passHref>
+                    <Button
+                      asChild
+                      className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700"
+                    >
+                      <span>Login</span>
+                    </Button>
+                  </Link>
                 )}
                 {loggedIn && (
                   <>
                     {isFeed && (
-                      <SheetClose asChild>
-                        <Link href="/subscribe">
-                          <Button className="w-full">Subscriptions</Button>
-                        </Link>
-                      </SheetClose>
+                      <Link href="/subscribe" passHref>
+                        <Button asChild className="w-full">
+                          <span>Subscriptions</span>
+                        </Button>
+                      </Link>
                     )}
                     {isFeed && (
-                      <SheetClose asChild>
-                        <Link href="/news">
-                          <Button className="w-full">Global News</Button>
-                        </Link>
-                      </SheetClose>
+                      <Link href="/news" passHref>
+                        <Button asChild className="w-full">
+                          <span>Global News</span>
+                        </Button>
+                      </Link>
                     )}
                     {!isFeed && (
-                      <SheetClose asChild>
-                        <Link href="/feed">
-                          <Button className="w-full">My Feed</Button>
-                        </Link>
-                      </SheetClose>
+                      <Link href="/feed" passHref>
+                        <Button asChild className="w-full">
+                          <span>My Feed</span>
+                        </Button>
+                      </Link>
                     )}
                     <Button
                       className="w-full bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
@@ -161,24 +161,35 @@ export default function Navbar() {
           </Button>
           <div className="hidden lg:flex lg:items-center lg:space-x-4">
             {loggedIn && isFeed && (
-              <Button>
-                <Link href="/subscribe">Subscriptions</Link>
-              </Button>
+              <Link href="/subscribe" passHref>
+                <Button asChild>
+                  <span>Subscriptions</span>
+                </Button>
+              </Link>
             )}
             {loggedIn && isFeed && (
-              <Button>
-                <Link href="/news">Global News</Link>
-              </Button>
+              <Link href="/news" passHref>
+                <Button asChild>
+                  <span>Global News</span>
+                </Button>
+              </Link>
             )}
             {loggedIn && !isFeed && (
-              <Button>
-                <Link href="/feed">My Feed</Link>
-              </Button>
+              <Link href="/feed" passHref>
+                <Button asChild>
+                  <span>My Feed</span>
+                </Button>
+              </Link>
             )}
             {!isAuthPage && !loggedIn && (
-              <Button className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700">
-                <Link href="/auth">Login</Link>
-              </Button>
+              <Link href="/auth" passHref>
+                <Button
+                  asChild
+                  className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700"
+                >
+                  <span>Login</span>
+                </Button>
+              </Link>
             )}
             {loggedIn && (
               <Button
