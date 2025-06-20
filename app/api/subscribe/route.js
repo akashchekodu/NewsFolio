@@ -1,36 +1,10 @@
 // /api/subscribe
 
+import pool from "@/app/utils/connection"; // Assuming this is your database connection
 import { NextResponse } from "next/server";
-import pool from "@/app/utils/connection";
 
-const ALLOWED_ORIGIN = "https://newsfolio.vercel.app";
-const VALID_API_KEY = process.env.API_SECRET_KEY;
-
-// 🔒 Common security middleware
-async function checkSecurity(req) {
-  const origin = req.headers.get("origin");
-  const referer = req.headers.get("referer");
-  const apiKey = req.headers.get("x-api-key");
-
-  if (
-    (origin && origin !== ALLOWED_ORIGIN) ||
-    (referer && !referer.startsWith(ALLOWED_ORIGIN))
-  ) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  if (!apiKey || apiKey !== VALID_API_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  return null; // pass
-}
-
-// 🔐 POST: Add keyword
+// POST: Add a new keyword subscription for the user
 export async function POST(req) {
-  const sec = await checkSecurity(req);
-  if (sec) return sec;
-
   const { keyword, email } = await req.json();
 
   try {
@@ -41,26 +15,32 @@ export async function POST(req) {
       });
     }
 
-    const userRes = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-    if (userRes.rowCount === 0) {
+    // Check if the user exists
+    const emailQuery = "SELECT id FROM users WHERE email = $1";
+    const res = await pool.query(emailQuery, [email]);
+
+    if (res.rowCount === 0) {
       return NextResponse.json({ success: false, message: "User not found" });
     }
 
-    const userId = userRes.rows[0].id;
+    const userId = res.rows[0].id;
 
-    const checkRes = await pool.query(
-      "SELECT * FROM subscriptions WHERE user_id = $1 AND keyword = $2",
-      [userId, keyword]
-    );
+    // Check if the keyword already exists for this user
+    const keywordQuery =
+      "SELECT * FROM subscriptions WHERE user_id = $1 AND keyword = $2";
+    const keywordRes = await pool.query(keywordQuery, [userId, keyword]);
 
-    if (checkRes.rowCount > 0) {
+    if (keywordRes.rowCount > 0) {
       return NextResponse.json({
         success: false,
         message: "Already subscribed to this keyword",
       });
     }
 
-    await pool.query("INSERT INTO subscriptions (user_id, keyword) VALUES ($1, $2)", [userId, keyword]);
+    // Insert the new keyword for this user
+    const insertQuery =
+      "INSERT INTO subscriptions (user_id, keyword) VALUES ($1, $2)";
+    await pool.query(insertQuery, [userId, keyword]);
 
     return NextResponse.json({
       success: true,
@@ -75,12 +55,9 @@ export async function POST(req) {
   }
 }
 
-// 🔐 GET: Retrieve keywords
+// GET: Fetch all keywords subscribed by the user
 export async function GET(req) {
-  const sec = await checkSecurity(req);
-  if (sec) return sec;
-
-  const email = req.nextUrl.searchParams.get("email");
+  const email = req.nextUrl.searchParams.get("email"); // Get email from query parameters
 
   try {
     if (!email) {
@@ -90,19 +67,22 @@ export async function GET(req) {
       });
     }
 
-    const userRes = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-    if (userRes.rowCount === 0) {
+    // Check if the user exists
+    const emailQuery = "SELECT id FROM users WHERE email = $1";
+    const res = await pool.query(emailQuery, [email]);
+
+    if (res.rowCount === 0) {
       return NextResponse.json({ success: false, message: "User not found" });
     }
 
-    const userId = userRes.rows[0].id;
+    const userId = res.rows[0].id;
 
-    const keywordRes = await pool.query(
-      "SELECT keyword FROM subscriptions WHERE user_id = $1",
-      [userId]
-    );
+    // Get all keywords the user has subscribed to
+    const keywordsQuery =
+      "SELECT keyword FROM subscriptions WHERE user_id = $1";
+    const keywordsRes = await pool.query(keywordsQuery, [userId]);
 
-    const keywords = keywordRes.rows.map((row) => row.keyword);
+    const keywords = keywordsRes.rows.map((row) => row.keyword);
 
     return NextResponse.json({ success: true, keywords });
   } catch (error) {
@@ -114,11 +94,8 @@ export async function GET(req) {
   }
 }
 
-// 🔐 DELETE: Remove keyword
+// DELETE: Remove a keyword subscription for the user
 export async function DELETE(req) {
-  const sec = await checkSecurity(req);
-  if (sec) return sec;
-
   const { keyword, email } = await req.json();
 
   try {
@@ -129,17 +106,20 @@ export async function DELETE(req) {
       });
     }
 
-    const userRes = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-    if (userRes.rowCount === 0) {
+    // Check if the user exists
+    const emailQuery = "SELECT id FROM users WHERE email = $1";
+    const res = await pool.query(emailQuery, [email]);
+
+    if (res.rowCount === 0) {
       return NextResponse.json({ success: false, message: "User not found" });
     }
 
-    const userId = userRes.rows[0].id;
+    const userId = res.rows[0].id;
 
-    const deleteRes = await pool.query(
-      "DELETE FROM subscriptions WHERE user_id = $1 AND keyword = $2",
-      [userId, keyword]
-    );
+    // Delete the keyword subscription
+    const deleteQuery =
+      "DELETE FROM subscriptions WHERE user_id = $1 AND keyword = $2";
+    const deleteRes = await pool.query(deleteQuery, [userId, keyword]);
 
     if (deleteRes.rowCount === 0) {
       return NextResponse.json({
