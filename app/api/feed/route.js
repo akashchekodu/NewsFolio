@@ -1,16 +1,38 @@
-// /api/feed
-
 import { NextResponse } from "next/server";
 import pool from "@/app/utils/connection";
 
-export async function GET(req) {
-  const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email");
-  const page = parseInt(searchParams.get("page")) || 1; // Pagination page number
-  const limit = parseInt(searchParams.get("limit")) || 10; // Pagination limit
-  const offset = (page - 1) * limit;
+// ✅ OPTIONAL: Use API key from env for extra protection
+const ALLOWED_ORIGIN = "https://newsfolio.vercel.app";
+const EXPECTED_API_KEY = process.env.API_SECRET_KEY;
 
+export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+
+    // ✅ SECURITY CHECKS
+    const origin = req.headers.get("origin");
+    const apiKey = req.headers.get("x-api-key");
+
+    if (origin !== ALLOWED_ORIGIN) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden: Invalid origin" },
+        { status: 403 }
+      );
+    }
+
+    if (EXPECTED_API_KEY && apiKey !== EXPECTED_API_KEY) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden: Invalid API key" },
+        { status: 401 }
+      );
+    }
+
+    // ✅ Query params
+    const email = searchParams.get("email");
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 10;
+    const offset = (page - 1) * limit;
+
     if (!email) {
       return NextResponse.json({
         success: false,
@@ -18,57 +40,44 @@ export async function GET(req) {
       });
     }
 
-    // Step 1: Retrieve user by email
-    const emailQuery = "SELECT id FROM users WHERE email = $1";
-    const userResult = await pool.query(emailQuery, [email]);
-
+    // ✅ Step 1: Get user ID
+    const userResult = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
     if (userResult.rowCount === 0) {
       return NextResponse.json({ success: false, message: "User not found" });
     }
-
     const userId = userResult.rows[0].id;
 
-    // Step 2: Get user's subscribed keywords
-    const keywordQuery = "SELECT keyword FROM subscriptions WHERE user_id = $1";
-    const keywordResult = await pool.query(keywordQuery, [userId]);
-
+    // ✅ Step 2: Get subscribed keywords
+    const keywordResult = await pool.query("SELECT keyword FROM subscriptions WHERE user_id = $1", [userId]);
     if (keywordResult.rowCount === 0) {
-      return NextResponse.json({
-        success: false,
-        message: "No keywords subscribed",
-      });
+      return NextResponse.json({ success: false, message: "No keywords subscribed" });
     }
 
-    const keywords = keywordResult.rows.map((row) => row.keyword);
+    const keywords = keywordResult.rows.map(row => row.keyword);
 
-    // Step 3: Use keywords to filter news articles
-    const keywordConditions = keywords
-      .map((_, idx) => `title ~* $${idx + 1}`)
-      .join(" OR "); // Use case-insensitive regex search for each keyword
-    const params = keywords;
+    // ✅ Step 3: Build dynamic query
+    const keywordConditions = keywords.map((_, i) => `title ~* $${i + 1}`).join(" OR ");
+    const queryParams = [...keywords];
 
-    // Count total articles matching the keywords
-    const countQuery = `
-      SELECT COUNT(*) AS total 
-      FROM news 
-      WHERE ${keywordConditions}
-    `;
-    const countResult = await pool.query(countQuery, params);
+    // ✅ Step 4: Count matching articles
+    const countQuery = `SELECT COUNT(*) AS total FROM news WHERE ${keywordConditions}`;
+    const countResult = await pool.query(countQuery, queryParams);
     const totalArticles = parseInt(countResult.rows[0].total, 10);
 
-    // Fetch the actual news articles with pagination
+    // ✅ Step 5: Fetch paginated results
     const newsQuery = `
       SELECT title, link, date, description, source, created_at
       FROM news 
-      WHERE ${keywordConditions} 
-      ORDER BY created_at DESC 
-      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      WHERE ${keywordConditions}
+      ORDER BY created_at DESC
+      LIMIT $${queryParams.length + 1}
+      OFFSET $${queryParams.length + 2}
     `;
-    params.push(limit, offset); // Add limit and offset to the params
+    queryParams.push(limit, offset);
 
-    const newsResult = await pool.query(newsQuery, params);
+    const newsResult = await pool.query(newsQuery, queryParams);
 
-    const newsList = newsResult.rows.map((item) => ({
+    const newsList = newsResult.rows.map(item => ({
       title: item.title,
       link: item.link,
       date: item.date ? item.date.toISOString() : null,
@@ -77,7 +86,6 @@ export async function GET(req) {
       created_at: item.created_at,
     }));
 
-    // Return the news feed with pagination info
     return NextResponse.json({
       success: true,
       page,
@@ -86,7 +94,7 @@ export async function GET(req) {
       totalArticles,
     });
   } catch (error) {
-    console.error("Error fetching feed:", error);
+    console.error("❌ Error fetching feed:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }
