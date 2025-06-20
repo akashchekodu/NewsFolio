@@ -1,33 +1,29 @@
 import { NextResponse } from "next/server";
 import pool from "@/app/utils/connection";
 
-// ✅ OPTIONAL: Use API key from env for extra protection
-const ALLOWED_ORIGIN = "https://newsfolio.vercel.app";
-const EXPECTED_API_KEY = process.env.API_SECRET_KEY;
+// ✅ ALLOWLISTED ORIGINS
+const ALLOWED_ORIGINS = new Set([
+  "https://newsfolio.vercel.app",
+  "https://financial-news-nextjs-3o2y.vercel.app"
+]);
 
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-
-    // ✅ SECURITY CHECKS
     const origin = req.headers.get("origin");
-    const apiKey = req.headers.get("x-api-key");
+    const referer = req.headers.get("referer");
 
-    if (origin !== ALLOWED_ORIGIN) {
+    // ✅ Reject if request is from an unknown site
+    const originAllowed = origin && ALLOWED_ORIGINS.has(origin);
+    const refererAllowed = referer && [...ALLOWED_ORIGINS].some((allowed) => referer.startsWith(allowed));
+
+    if (!originAllowed && !refererAllowed) {
       return NextResponse.json(
-        { success: false, message: "Forbidden: Invalid origin" },
+        { success: false, message: "Forbidden: Untrusted origin or referer" },
         { status: 403 }
       );
     }
 
-    if (EXPECTED_API_KEY && apiKey !== EXPECTED_API_KEY) {
-      return NextResponse.json(
-        { success: false, message: "Forbidden: Invalid API key" },
-        { status: 401 }
-      );
-    }
-
-    // ✅ Query params
     const email = searchParams.get("email");
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 10;
@@ -40,14 +36,13 @@ export async function GET(req) {
       });
     }
 
-    // ✅ Step 1: Get user ID
     const userResult = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
     if (userResult.rowCount === 0) {
       return NextResponse.json({ success: false, message: "User not found" });
     }
+
     const userId = userResult.rows[0].id;
 
-    // ✅ Step 2: Get subscribed keywords
     const keywordResult = await pool.query("SELECT keyword FROM subscriptions WHERE user_id = $1", [userId]);
     if (keywordResult.rowCount === 0) {
       return NextResponse.json({ success: false, message: "No keywords subscribed" });
@@ -55,16 +50,13 @@ export async function GET(req) {
 
     const keywords = keywordResult.rows.map(row => row.keyword);
 
-    // ✅ Step 3: Build dynamic query
     const keywordConditions = keywords.map((_, i) => `title ~* $${i + 1}`).join(" OR ");
     const queryParams = [...keywords];
 
-    // ✅ Step 4: Count matching articles
     const countQuery = `SELECT COUNT(*) AS total FROM news WHERE ${keywordConditions}`;
     const countResult = await pool.query(countQuery, queryParams);
     const totalArticles = parseInt(countResult.rows[0].total, 10);
 
-    // ✅ Step 5: Fetch paginated results
     const newsQuery = `
       SELECT title, link, date, description, source, created_at
       FROM news 

@@ -64,16 +64,7 @@ function FeedPage() {
           limit,
         }).toString();
 
-        const response = await fetch(`/api/news?${queryParams}`, {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    "Origin": "https://newsfolio.vercel.app",        // Required if you're validating it server-side
-    "Referer": "https://newsfolio.vercel.app/",      // Also optional, some backends check this
-    "x-api-key": process.env.NEXT_PUBLIC_NEWS_API_KEY // Secure key if you're using API key validation
-  },
-});
-
+        const response = await fetch(`/api/feed?${queryParams}`);
         if (!response.ok) {
           throw new Error("Failed to fetch feed articles");
         }

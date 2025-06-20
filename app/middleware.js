@@ -1,29 +1,27 @@
-// middleware.ts
-import { NextResponse } from "next/server";
+// middleware.js
+import { NextResponse } from 'next/server';
 
-const ALLOWED_ORIGIN = "https://newsfolio.vercel.app";
-const SECRET = process.env.API_SECRET_KEY;
+const ALLOWED_ORIGINS = new Set([
+  'https://newsfolio.vercel.app',
+  'https://financial-news-nextjs-3o2y.vercel.app',
+]);
 
 export function middleware(req) {
-  // only run on /api routes
-  const apiKey = req.headers.get("x-api-key") || "";
-  const origin = req.headers.get("origin") || "";
-  const referer = req.headers.get("referer") || "";
+  const origin = req.headers.get('origin');
+  const referer = req.headers.get('referer');
 
-  // check API key + origin/referer
   if (
-    apiKey !== SECRET ||
-    !(origin === ALLOWED_ORIGIN || referer.startsWith(ALLOWED_ORIGIN))
+    origin && !ALLOWED_ORIGINS.has(origin) ||
+    referer && ![...ALLOWED_ORIGINS].some(allowed => referer.startsWith(allowed))
   ) {
-    return new NextResponse(
-      JSON.stringify({ error: "Unauthorized" }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response('Forbidden', { status: 403 });
   }
 
   return NextResponse.next();
 }
 
+
+// ✅ Apply only to /api/* routes
 export const config = {
-  matcher: ["/api/:path*"],  // only protect /api/* routes
+  matcher: ['/api/:path*'],
 };

@@ -45,12 +45,7 @@ const SubscribePage = () => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`/api/subscribe?email=${email}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_SECRET_KEY,
-      },
-    });
-
+      const response = await fetch(`/api/subscribe?email=${email}`);
       const data = await response.json();
       if (data.success) {
         setKeywords(data.keywords);
@@ -90,7 +85,6 @@ const SubscribePage = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-api-key": process.env.NEXT_PUBLIC_API_SECRET_KEY,
           },
           body: JSON.stringify({
             keyword: newKeyword,
@@ -122,7 +116,6 @@ const SubscribePage = () => {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            "x-api-key": process.env.NEXT_PUBLIC_API_SECRET_KEY,
           },
           body: JSON.stringify({ keyword, email: session.user.email }),
         });
